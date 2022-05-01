@@ -28,11 +28,27 @@ async function run() {
          res.send(result);
       });
 
-       // Get Request for one particular product
-       app.get('/product/:id', async (req, res) => {
-          const id = req.params.id;
-         const query = {_id: ObjectId(id)};
+      // Get Request for one particular product
+      app.get('/product/:id', async (req, res) => {
+         const id = req.params.id;
+         const query = { _id: ObjectId(id) };
          const result = await productCollection.findOne(query);
+         res.send(result);
+      });
+
+      // Update product request
+      app.put('/product/:id', async (req, res) => {
+         const id = req.params.id;
+         const reqBody = req.body;
+         const filter = { _id: ObjectId(id) };
+         const option = { upsert: true };
+         const updateData = {
+            $set: {
+               quantity: reqBody.quantity,
+               stock: reqBody.stock
+            }
+         }
+         const result = await productCollection.updateOne(filter, updateData, option);
          res.send(result);
       });
 
