@@ -19,9 +19,17 @@ async function run() {
    try {
       await client.connect();
       const productCollection = client.db("productInventory").collection("product");
+      const blogs = client.db('blogs').collection('blog');
 
-      // Get Request for all product
-      app.get('/product', async (req, res) => {
+      // blog operation
+      app.get('/blog', async (req, res) => {
+         const query = {};
+         const result = await blogs.find(query).toArray();
+         res.send(result);
+      });
+
+      // Get Request for all product inventory
+      app.get('/inventory', async (req, res) => {
          const query = {};
          const cursor = productCollection.find(query);
          const result = await cursor.toArray();
@@ -29,7 +37,7 @@ async function run() {
       });
 
       // Get Request for one particular product
-      app.get('/product/:id', async (req, res) => {
+      app.get('/inventory/:id', async (req, res) => {
          const id = req.params.id;
          const query = { _id: ObjectId(id) };
          const result = await productCollection.findOne(query);
@@ -37,15 +45,17 @@ async function run() {
       });
 
       // Update product request
-      app.put('/product/:id', async (req, res) => {
+      app.put('/inventory/:id', async (req, res) => {
+         let stock;
          const id = req.params.id;
          const reqBody = req.body;
          const filter = { _id: ObjectId(id) };
          const option = { upsert: true };
+         stock = reqBody.quantity > 0 ? 'in' : 'out';
          const updateData = {
             $set: {
                quantity: reqBody.quantity,
-               stock: reqBody.stock
+               stock: stock
             }
          }
          const result = await productCollection.updateOne(filter, updateData, option);
@@ -53,24 +63,24 @@ async function run() {
       });
 
       // insert product into database
-      app.post('/product', async (req, res) => {
+      app.post('/inventory', async (req, res) => {
          const data = req.body;
          const result = await productCollection.insertOne(data);
          res.send(result);
       })
 
       // find my-item request
-      app.get('/my-product/:email', async(req, res) => {
+      app.get('/my-inventory/:email', async (req, res) => {
          const email = req.params.email;
-         const query = {sup_email: email};
+         const query = { sup_email: email };
          const result = await productCollection.find(query).toArray();
          res.send(result);
       });
 
       // delete item request from database
-      app.delete('/product/:id', async(req, res) => {
+      app.delete('/inventory/:id', async (req, res) => {
          const id = req.params.id;
-         const query = {_id: ObjectId(id)};
+         const query = { _id: ObjectId(id) };
          const result = await productCollection.deleteOne(query);
          res.send(result);
       });
