@@ -54,7 +54,7 @@ async function run() {
          res.send(result);
       });
 
-      // Get Request for all product inventory
+      // Get Request for all products in inventory
       app.get('/inventory', async (req, res) => {
          const query = {};
          const cursor = productCollection.find(query);
@@ -63,17 +63,17 @@ async function run() {
       });
 
       // Get Request for one particular product
-      app.get('/inventory/:id', async (req, res) => {
-         const id = req.params.id;
+      app.get('/product', async (req, res) => {
+         const id = req.query.productId;
          const query = { _id: ObjectId(id) };
          const result = await productCollection.findOne(query);
          res.send(result);
       });
 
       // Update product request
-      app.put('/inventory/:id', async (req, res) => {
+      app.put('/product', async (req, res) => {
          let stock;
-         const id = req.params.id;
+         const id = req.query.productId;
          const reqBody = req.body;
          const filter = { _id: ObjectId(id) };
          const option = { upsert: true };
@@ -100,7 +100,7 @@ async function run() {
          const decodedEmail = req.decoded.email;
          const email = req.query.email;
          if (email === decodedEmail) {
-            const query = { sup_email: email };
+            const query = { userEmail: email };
             const result = await productCollection.find(query).toArray();
             res.send(result);
          } else {
@@ -108,8 +108,8 @@ async function run() {
          }
       });
 
-      // delete item request from database
-      app.delete('/inventory/:id', async (req, res) => {
+      // delete single item request from database
+      app.delete('/product/:id', async (req, res) => {
          const id = req.params.id;
          const query = { _id: ObjectId(id) };
          const result = await productCollection.deleteOne(query);
